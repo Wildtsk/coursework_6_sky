@@ -15,7 +15,6 @@ class AdPagination(pagination.PageNumberPagination):
 # TODO view функции. Предлагаем Вам следующую структуру - но Вы всегда можете использовать свою
 
 
-
 class AdViewSet(viewsets.ModelViewSet):
     queryset = Ad.objects.all()
     pagination_class = AdPagination
@@ -32,10 +31,14 @@ class AdViewSet(viewsets.ModelViewSet):
             self.permission_classes = [IsAuthenticated, IsAdminUser | IsOwner]
         return super().get_permissions()
 
+    def perform_create(self, serializer):
+        user = self.request.user
+        serializer.save(author=user)
+
     @action(detail=False)
     def me(self, request, *args, **kwargs):
         self.queryset = Ad.objects.filter(author=request.user)
-        return  super().list(self, request, *args, **kwargs)
+        return super().list(self, request, *args, **kwargs)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
